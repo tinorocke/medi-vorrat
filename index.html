@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Medi-Vorrat</title>
+<meta name="theme-color" content="#14161a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;500;600&family=Inter:wght@400;500;600&display=swap">
+<style id="css">
+/* VOICE: ruhig, klar, ein Blick reicht
+   IDEA: Blisterpackung aus der Apotheke
+   PICTURE: pro Medikament ein Blister – volle Mulden = übrig, leere = verbraucht
+   COLOUR and TYPE: Weiß, Alu-Grau, Kapselfarbe je Medikament; Status-Band oben (Tinte / Orange / Rot); Inter Tight 300 groß + Inter
+   LAYOUT: Status-Satz oben als volles Band, darunter Karten in einer Spalte, auf breiten Schirmen zwei */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#111315);--ink:light-dark(#14161a,#f1f2f4);--mute:light-dark(#5b616a,#a0a7b1);--card:light-dark(#f5f6f8,#1a1d21);--foil:light-dark(#e3e6ea,#262a30);--foil2:light-dark(#c3c9d0,#434951);--warn:light-dark(#a34f00,#ffb366);--warnbg:light-dark(#fff0dc,#3a2610);--bad:light-dark(#b8281a,#ff8a78);--badbg:light-dark(#fde6e2,#3d1712);--sum:light-dark(#14161a,#f1f2f4);--sumink:light-dark(#ffffff,#14161a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip;padding-bottom:72px}
+.band{padding:clamp(20px,4vw,48px) max(5vw,16px)}
+.wrap{max-width:1000px;margin:0 auto}
+.top{padding-bottom:8px}
+.top h1{font:600 clamp(26px,5vw,34px)/1.1 "Inter Tight",Inter,sans-serif;margin:0}
+.top p{margin:4px 0 0;color:var(--mute);font-size:14px}
+.sum{background:var(--sum);color:var(--sumink);transition:background .3s}
+.sum.warn{background:var(--warn);color:#fff}.sum.bad{background:var(--bad);color:#fff}
+:root[data-theme=dark] .sum.warn,:root[data-theme=dark] .sum.bad{color:#14161a}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .sum.warn,:root:not([data-theme=light]) .sum.bad{color:#14161a}}
+.sum h2{font:300 clamp(30px,6.5vw,50px)/1.08 "Inter Tight",Inter,sans-serif;margin:0;text-wrap:balance}
+.sum p{margin:10px 0 0;font-size:16px;opacity:.85}
+.list{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:860px){.list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.med{background:var(--card);border-radius:20px;padding:18px}
+.mh{display:flex;align-items:center;gap:10px}.mh button{padding:0 6px;flex:none}
+.mh h3{margin:0;font:600 19px/1.2 "Inter Tight",Inter,sans-serif;flex:1}
+.mh h3 span{font-weight:500;color:var(--mute);margin-left:6px;white-space:nowrap}
+.big{display:flex;align-items:baseline;gap:10px;margin-top:10px}
+.big b{font:300 clamp(56px,15vw,84px)/1 "Inter Tight",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.big span{color:var(--mute)}
+.days{margin:4px 0 12px;font-size:17px}
+.days b{white-space:nowrap}
+/* Kapseln: --a = Kappe, --b = Unterteil, --sv/--sh = Streifen */
+.pl{display:block;border-radius:999px;flex:none}
+.pv{width:14px;height:36px;box-shadow:0 1px 2px rgba(0,0,0,.25);background:linear-gradient(90deg,rgba(0,0,0,.16),rgba(255,255,255,.5) 30%,rgba(255,255,255,0) 58%,rgba(0,0,0,.18)),var(--sv,linear-gradient(transparent,transparent)),linear-gradient(180deg,var(--a) 0 48%,rgba(0,0,0,.2) 48% 50%,var(--b) 50%)}
+.ph{width:32px;height:12px;box-shadow:0 1px 2px rgba(0,0,0,.25);background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 45%,rgba(0,0,0,.16)),var(--sh,linear-gradient(transparent,transparent)),linear-gradient(90deg,var(--a) 0 48%,rgba(0,0,0,.2) 48% 50%,var(--b) 50%)}
+.lk-v37{--a:#a2a69e;--b:#f0c6b8;--sv:linear-gradient(180deg,transparent 30%,#cf4f2a 30% 36%,transparent 36% 41%,#cf4f2a 41% 43%,transparent 43% 63%,#cf4f2a 63% 69%,transparent 69% 74%,#cf4f2a 74% 76%,transparent 76%);--sh:linear-gradient(90deg,transparent 30%,#cf4f2a 30% 36%,transparent 36% 41%,#cf4f2a 41% 43%,transparent 43% 63%,#cf4f2a 63% 69%,transparent 69% 74%,#cf4f2a 74% 76%,transparent 76%)}
+.lk-v75{--a:#f7c7a3;--b:#f7c7a3}
+.lk-elv{--a:#fbfbfb;--b:#1fb2ad}
+.mh .pl{width:38px;height:14px}
+/* Blister */
+.bl{border-radius:14px;padding:6px;display:grid;grid-template-columns:repeat(auto-fill,minmax(28px,1fr));box-shadow:inset 0 0 0 1px rgba(0,0,0,.1),0 2px 6px rgba(0,0,0,.12);background:repeating-linear-gradient(45deg,rgba(0,0,0,.07) 0 1px,transparent 1px 5px),repeating-linear-gradient(-45deg,rgba(0,0,0,.07) 0 1px,transparent 1px 5px),linear-gradient(135deg,#eceef1,#c7ccd1 55%,#e4e7ea)}
+.cell{height:54px;display:grid;place-items:center;border-right:1px dashed rgba(0,0,0,.13);border-bottom:1px dashed rgba(0,0,0,.13)}
+.bub{display:block;padding:3px;border-radius:999px;background:rgba(255,255,255,.4);box-shadow:inset 0 0 0 1px rgba(255,255,255,.8),0 2px 3px rgba(0,0,0,.2)}
+.hole{display:block;width:20px;height:42px;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1);background:linear-gradient(100deg,transparent 44%,rgba(0,0,0,.2) 45% 47%,transparent 48%),linear-gradient(8deg,transparent 46%,rgba(0,0,0,.16) 47% 49%,transparent 50%),linear-gradient(170deg,#f3f5f7,#cfd4d9)}
+/* Dose */
+.dose{max-width:440px;margin:0 auto}
+.lid{width:64%;height:26px;margin:0 auto;border-radius:9px 9px 3px 3px;background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(0,0,0,.06)),repeating-linear-gradient(90deg,#f6f6f6 0 4px,#d9dadc 4px 6px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.neck{width:58%;height:7px;margin:0 auto;background:#dedfe1}
+.jar{border-radius:24px;padding:12px;background:linear-gradient(90deg,#e4e5e7,#fff 22%,#fff 62%,#dcdde0);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08),0 3px 8px rgba(0,0,0,.14)}
+.lab{text-align:center;color:#14161a;font:600 15px/1.2 "Inter Tight",Inter,sans-serif;padding:7px 0;border-block:2px solid #1fb2ad}
+.lab span{font-weight:500;color:#5b616a}
+.pile{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px 2px;margin-top:10px;padding:8px 4px;border-radius:14px;background:rgba(0,0,0,.035)}
+.pc{height:20px;display:grid;place-items:center}
+.pc .ph{width:min(100%,30px);height:11px}
+.pc:nth-child(3n) .ph{transform:rotate(-16deg)}.pc:nth-child(4n+1) .ph{transform:rotate(11deg)}.pc:nth-child(5n+2) .ph{transform:rotate(-5deg)}
+.lbl{font-size:14px;color:var(--mute);display:block;margin-bottom:4px}
+.unit{font-size:13px;color:var(--mute);margin:6px 0 0}
+.st{margin:12px 0 0;padding:10px 12px;border-radius:12px;font-weight:500}
+.st.warn{background:var(--warnbg);color:var(--warn)}.st.bad{background:var(--badbg);color:var(--bad)}
+.st.sample{background:var(--foil);color:var(--ink);font-weight:400;font-size:14px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+button{font:500 15px/1 Inter,sans-serif;min-height:44px;padding:0 16px;border-radius:12px;border:1.5px solid var(--foil2);background:var(--bg);color:var(--ink);cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--c,#5c4bd6);outline-offset:2px}
+button.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button.ghost{border-color:transparent;background:transparent;color:var(--mute)}
+.sm{font-size:13px;color:var(--mute);margin:10px 0 0}
+.add{width:100%;margin-top:16px;border-style:dashed;min-height:56px}
+.note{font-size:13px;color:var(--mute);max-width:70ch}
+dialog{border:0;border-radius:20px;padding:0;width:min(520px,94vw);background:var(--bg);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,12,15,.55)}
+form{padding:20px;display:grid;gap:14px}
+form h3{margin:0;font:600 22px/1.2 "Inter Tight",Inter,sans-serif}
+label{display:grid;gap:4px;font-size:14px;color:var(--mute)}
+input[type=text],input[type=number]{font:16px Inter,sans-serif;min-height:44px;padding:0 12px;border-radius:10px;border:1.5px solid var(--foil2);background:var(--card);color:var(--ink);width:100%}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg label,.cols label{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:15px;min-height:44px;padding:0 12px;border:1.5px solid var(--foil2);border-radius:10px;cursor:pointer}
+.seg input:checked+span{font-weight:600}
+.cols{display:flex;gap:8px;flex-wrap:wrap}
+.cols label{padding:0 10px}.cols i{width:22px;height:22px;border-radius:50%;background:var(--c);display:block}
+.cols input{accent-color:var(--ink)}
+.fa{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+.err{color:var(--bad);font-size:14px;margin:0}
+textarea{font:13px/1.4 ui-monospace,monospace;padding:10px;border-radius:10px;border:1.5px solid var(--foil2);background:var(--card);color:var(--ink);width:100%;resize:vertical}
+.tools{margin-top:12px}
+.toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--ink);color:var(--bg);border-radius:14px;padding:6px 6px 6px 16px;display:flex;align-items:center;gap:10px;max-width:92vw;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.toast[hidden]{display:none}
+.toast button{background:transparent;color:var(--bg);border-color:transparent;text-decoration:underline}
+@media(prefers-reduced-motion:reduce){.sum{transition:none}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="application/json" id="state">{"v":1,"savedAt":0,"undo":null,"meds":[]}</script>
+<script id="app">
+{
+const SKELETON = `
+<header class="band top"><div class="wrap"><h1>Meine Medikamente</h1><p id="stand"></p></div></header>
+<section class="band sum" id="sum" aria-live="polite"><div class="wrap"><h2 id="sumH"></h2><p id="sumP"></p></div></section>
+<main class="band"><div class="wrap">
+  <div class="list" id="list"></div>
+  <button class="add" id="addBtn" type="button">+ Medikament hinzufügen</button>
+  <div class="acts tools"><button type="button" id="bkOpen">Sicherung</button><button type="button" id="ntBtn">Hinweise erlauben</button></div>
+  <p class="note">Der Zähler zieht zu deinen Einnahmezeiten automatisch ab – egal, ob du wirklich genommen hast. Einnahme vergessen? <b>+1</b> tippen. Extra genommen? <b>−1</b>.</p>
+</div></main>
+<dialog id="dlg"><form id="frm" novalidate>
+  <h3 id="fT">Medikament</h3>
+  <div class="row"><label>Name<input type="text" id="fName" autocomplete="off"></label><label>Stärke<input type="text" id="fDose" placeholder="z. B. 40 mg" autocomplete="off"></label></div>
+  <div class="row"><label>Bestand jetzt (Stück)<input type="number" id="fCount" min="0" step="0.5" inputmode="decimal"></label><label>Packungsgröße<input type="number" id="fPack" min="1" step="1" inputmode="numeric"></label></div>
+  <div class="seg" role="radiogroup" aria-label="Einnahme"><label><input type="radio" name="mode" value="fix"><span>Feste Zeiten</span></label><label><input type="radio" name="mode" value="bedarf"><span>Bei Bedarf</span></label></div>
+  <div class="row" id="fixRow"><label>Uhrzeiten<input type="text" id="fTimes" placeholder="07:30, 20:00" inputmode="numeric" autocomplete="off"></label><label>Stück pro Einnahme<input type="number" id="fPer" min="0.5" step="0.5" inputmode="decimal"></label></div>
+  <label id="warnRow">Warnen, wenn es noch so viele Tage reicht<input type="number" id="fWarn" min="0" step="1" inputmode="numeric"></label>
+  <div><span class="lbl">Verpackung</span><div class="seg" role="radiogroup" aria-label="Verpackung"><label><input type="radio" name="box" value="blister"><span>Blister</span></label><label><input type="radio" name="box" value="dose"><span>Dose</span></label></div></div>
+  <div><span class="lbl">Kapsel</span><div class="seg" role="radiogroup" aria-label="Kapsel" id="fLooks"></div></div>
+  <div id="ownRow" style="display:grid;gap:10px">
+    <div class="seg" role="radiogroup" aria-label="Farbig"><label><input type="radio" name="tone" value="two"><span>Zweifarbig</span></label><label><input type="radio" name="tone" value="mono"><span>Einfarbig</span></label></div>
+    <div><span class="lbl">Farbe</span><div class="cols" id="fCols"></div></div>
+  </div>
+  <p class="err" id="fErr" hidden></p>
+  <div class="fa"><button type="button" class="ghost" id="fDel">Löschen</button><span style="display:flex;gap:8px"><button type="button" id="fCancel">Abbrechen</button><button type="submit" class="pri">Speichern</button></span></div>
+</form></dialog>
+<dialog id="bk"><form id="bkF" novalidate>
+  <h3>Sicherung</h3>
+  <p class="note" style="margin:0">Deine Daten liegen nur auf diesem Handy. Kopier die Sicherung ab und zu irgendwohin, z. B. in eine Notiz an dich selbst. Zum Wiederherstellen: Text einfügen und „Wiederherstellen“ tippen.</p>
+  <textarea id="bkT" rows="6" spellcheck="false"></textarea>
+  <p class="err" id="bkE" hidden></p>
+  <div class="fa"><button type="button" id="bkC">Abbrechen</button><span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="bkCopy">Kopieren</button><button type="submit" class="pri">Wiederherstellen</button></span></div>
+</form></dialog>
+<div class="toast" id="toast" hidden role="status"><span id="tMsg"></span><button type="button" id="tUndo">Rückgängig</button></div>`;
+
+const COLORS = ['#1fa3a3','#e8590c','#5c4bd6','#d6336c','#2f9e44','#868e96'];
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const r2 = n => Math.round(n * 100) / 100;
+const num = n => Number(n).toLocaleString('de-DE', {maximumFractionDigits: 1});
+const fmtDate = d => d.toLocaleDateString('de-DE', {weekday: 'short', day: 'numeric', month: 'numeric'});
+const sod = d => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+const dayDiff = (a, b) => Math.round((sod(b) - sod(a)) / 864e5);
+const at = (d, hm) => { const [h, m] = hm.split(':').map(Number); const x = new Date(d); x.setHours(h, m, 0, 0); return x; };
+
+let state = JSON.parse($('state').textContent);
+try {
+  const ls = JSON.parse(localStorage.getItem('medi-state') || 'null');
+  if (ls && Array.isArray(ls.meds)) state = ls;
+} catch (e) {}
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+
+document.getElementById('root').innerHTML = SKELETON;
+
+function taken(m, now) {
+  if (m.mode !== 'fix' || !m.times.length) return 0;
+  let n = 0, g = 0; const d = sod(m.asOf);
+  while (d <= now && g++ < 4000) {
+    for (const t of m.times) { const e = at(d, t).getTime(); if (e > m.asOf && e <= now.getTime()) n += m.per; }
+    d.setDate(d.getDate() + 1);
+  }
+  return n;
+}
+const cur = (m, now) => Math.max(0, r2(m.count - taken(m, now)));
+function runout(m, now, c) {
+  if (m.mode !== 'fix' || !m.times.length || !(m.per > 0)) return null;
+  let left = c, g = 0, last = null; const d = sod(now);
+  while (g++ < 4000) {
+    for (const t of m.times) {
+      const e = at(d, t); if (e <= now) continue;
+      if (left < m.per - 1e-9) return {empty: e, last};
+      left -= m.per; last = e;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return null;
+}
+function info(m, now) {
+  const c = cur(m, now), ro = runout(m, now, c);
+  const empty = ro ? ro.empty : null, last = ro ? ro.last : null;
+  const days = last ? dayDiff(now, last) : (ro ? 0 : null);
+  let level = 'ok';
+  if (m.mode === 'fix') { if (c < m.per - 1e-9) level = 'bad'; else if (days !== null && days <= m.warn) level = 'warn'; }
+  else if (c <= 0) level = 'bad';
+  return {c, empty, last, days, level};
+}
+function settle(m) { const now = new Date(); m.count = cur(m, now); m.asOf = now.getTime(); }
+
+function render() {
+  const now = new Date();
+  $('stand').textContent = 'Stand: ' + now.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}) + ' Uhr · zählt automatisch mit';
+  const rows = state.meds.map(m => ({m, i: info(m, now)}));
+  // Zusammenfassung
+  const sum = $('sum'); sum.className = 'band sum';
+  const fix = rows.filter(r => r.m.mode === 'fix');
+  const bad = rows.filter(r => r.i.level === 'bad'), warn = rows.filter(r => r.i.level === 'warn');
+  const first = fix.filter(r => r.i.last).sort((a, b) => a.i.last - b.i.last)[0];
+  let h, p = '';
+  if (!rows.length) { h = 'Noch nichts eingetragen.'; p = 'Füge unten dein erstes Medikament hinzu.'; }
+  else if (bad.length) { sum.classList.add('bad'); h = bad.map(r => r.m.name).join(', ') + (bad.length > 1 ? ' sind leer.' : ' ist leer.'); p = 'Nachschub besorgen und dann „+ Packung“ tippen.'; }
+  else if (warn.length) { sum.classList.add('warn'); const w = warn.sort((a, b) => a.i.days - b.i.days)[0]; h = w.m.name + ' reicht nur noch ' + dayTxt(w.i.days) + '.'; p = 'Reicht bis ' + fmtDate(w.i.last) + ' – jetzt Rezept bzw. Nachschub besorgen.'; }
+  else if (first) { h = 'Alles reicht noch mindestens ' + dayTxt(first.i.days) + '.'; p = 'Als Erstes knapp: ' + first.m.name + ', reicht bis ' + fmtDate(first.i.last); }
+  else { h = 'Alles im Blick.'; p = 'Nur Bedarfsmedikamente eingetragen.'; }
+  $('sumH').textContent = h; $('sumP').textContent = p;
+  // Karten
+  $('list').innerHTML = rows.map(({m, i}) => card(m, i)).join('');
+}
+const dayTxt = d => d === 0 ? 'heute' : d === 1 ? '1 Tag' : d + ' Tage';
+
+function card(m, i) {
+  const full = Math.max(m.full || 0, i.c, 1);
+  const unit = full <= 50 ? 1 : Math.ceil(full / 50);
+  const total = Math.ceil(full / unit), filled = Math.min(total, Math.ceil(i.c / unit - 1e-9));
+  const lk = 'pl lk-' + (m.look || 'own');
+  let vis = '';
+  if (m.box === 'dose') {
+    let p = '';
+    for (let k = 0; k < total; k++) p += k < total - filled ? '<span class="pc"></span>' : '<span class="pc"><i class="ph ' + lk + '"></i></span>';
+    vis = '<div class="dose" aria-hidden="true"><div class="lid"></div><div class="neck"></div><div class="jar"><div class="lab">' + esc(m.name) + (m.dose ? ' <span>' + esc(m.dose) + '</span>' : '') + '</div><div class="pile">' + p + '</div></div></div>';
+  } else {
+    let c = '';
+    for (let k = 0; k < total; k++) c += k < total - filled ? '<span class="cell"><i class="hole"></i></span>' : '<span class="cell"><i class="bub"><i class="pv ' + lk + '"></i></i></span>';
+    vis = '<div class="bl" aria-hidden="true">' + c + '</div>';
+  }
+  let days = '';
+  if (m.mode === 'fix') days = !i.empty ? 'reicht sehr lange' : !i.last ? 'nichts mehr für die nächste Einnahme' : i.days === 0 ? 'reicht nur noch für <b>heute</b>' : 'reicht bis <b>' + esc(fmtDate(i.last)) + '</b> · noch <b>' + dayTxt(i.days) + '</b>';
+  else days = 'bei Bedarf – wird nur von Hand abgezogen';
+  let st = '';
+  if (i.level === 'bad') st = '<p class="st bad">Leer – Nachschub besorgen.</p>';
+  else if (i.level === 'warn') st = '<p class="st warn">Bald leer – Rezept bzw. Nachschub besorgen.</p>';
+  if (m.sample) st += '<p class="st sample">Nur volle Packungen gezählt. Angebrochene Packung noch nachtragen: „Bearbeiten“ → Bestand jetzt.</p>';
+  const plan = m.mode === 'fix' ? 'Zieht automatisch ' + num(m.per) + ' Stück ab um ' + m.times.join(' und ') + ' Uhr.' : '';
+  const own = '--c:' + esc(m.color) + ';--a:' + esc(m.color) + ';--b:' + (m.two !== false ? '#c4cad1' : esc(m.color));
+  return '<article class="med" style="' + own + '">'
+    + '<div class="mh"><i class="ph ' + lk + '"></i><h3>' + esc(m.name || 'Ohne Namen') + (m.dose ? '<span>' + esc(m.dose) + '</span>' : '') + '</h3>'
+    + '<button type="button" class="ghost" data-a="edit" data-id="' + esc(m.id) + '">Bearbeiten</button></div>'
+    + '<div class="big"><b>' + num(i.c) + '</b><span>Stück übrig</span></div>'
+    + '<p class="days">' + days + '</p>'
+    + vis
+    + (unit > 1 ? '<p class="unit">1 Kapsel im Bild = ' + unit + ' Stück</p>' : '')
+    + st
+    + '<div class="acts">'
+    + '<button type="button" data-a="minus" data-id="' + esc(m.id) + '" aria-label="Eins abziehen">−1</button>'
+    + '<button type="button" data-a="plus" data-id="' + esc(m.id) + '" aria-label="Eins dazu">+1</button>'
+    + '<button type="button" class="pri" data-a="pack" data-id="' + esc(m.id) + '">+ Packung (' + num(m.pack) + ')</button>'
+    + '</div>'
+    + (plan ? '<p class="sm">' + esc(plan) + '</p>' : '')
+    + '</article>';
+}
+
+// Speichern (nur auf diesem Gerät)
+let batchSnap = null, timer = null;
+function change(label, fn) {
+  if (!batchSnap) batchSnap = clone(state.meds);
+  fn();
+  state.undo = {meds: batchSnap, at: Date.now(), label};
+  render(); toast(label, true);
+  clearTimeout(timer); timer = setTimeout(save, 400);
+}
+function save() {
+  batchSnap = null;
+  state.savedAt = Date.now();
+  try { localStorage.setItem('medi-state', JSON.stringify(state)); }
+  catch (e) { toast('Speichern hat nicht geklappt', false); }
+}
+let tt = null;
+function toast(msg, undo) {
+  $('tMsg').textContent = msg; $('tUndo').hidden = !undo; $('toast').hidden = false;
+  clearTimeout(tt); tt = setTimeout(() => { $('toast').hidden = true; }, 6000);
+}
+$('tUndo').addEventListener('click', () => {
+  if (!state.undo) return;
+  state.meds = state.undo.meds; state.undo = null; batchSnap = null;
+  render(); toast('Rückgängig gemacht', false);
+  clearTimeout(timer); timer = setTimeout(save, 300);
+});
+
+// Aktionen auf Karten
+$('list').addEventListener('click', e => {
+  const b = e.target.closest('button[data-a]'); if (!b) return;
+  const m = state.meds.find(x => x.id === b.dataset.id); if (!m) return;
+  const a = b.dataset.a;
+  if (a === 'edit') return openDlg(m);
+  if (a === 'minus') change(m.name + ': −1', () => { settle(m); m.count = Math.max(0, r2(m.count - 1)); });
+  if (a === 'plus') change(m.name + ': +1', () => { settle(m); m.count = r2(m.count + 1); m.full = Math.max(m.full || 0, m.count); });
+  if (a === 'pack') change(m.name + ': +' + num(m.pack) + ' Stück', () => { settle(m); m.count = r2(m.count + m.pack); m.full = m.count; });
+});
+
+// Dialog
+let editing = null, delArmed = false;
+$('fCols').innerHTML = COLORS.map((c, k) => '<label style="--c:' + c + '"><input type="radio" name="col" value="' + c + '" aria-label="Farbe ' + (k + 1) + '"><i></i></label>').join('');
+const LOOKS = [['v37', 'Grau/rosa, gestreift'], ['v75', 'Apricot'], ['elv', 'Weiß/türkis'], ['own', 'Eigene Farbe']];
+$('fLooks').innerHTML = LOOKS.map(([k, t]) => '<label><input type="radio" name="look" value="' + k + '"><i class="ph pl lk-' + k + '"' + (k === 'own' ? ' style="--a:#868e96;--b:#c4cad1"' : '') + '></i><span>' + t + '</span></label>').join('');
+const setLook = v => { $('ownRow').style.display = v === 'own' ? 'grid' : 'none'; };
+document.querySelectorAll('input[name=look]').forEach(r => r.addEventListener('change', () => setLook(r.value)));
+function setMode(v) { $('fixRow').style.display = v === 'fix' ? '' : 'none'; $('warnRow').style.display = v === 'fix' ? '' : 'none'; }
+document.querySelectorAll('input[name=mode]').forEach(r => r.addEventListener('change', () => setMode(r.value)));
+function openDlg(m) {
+  editing = m || null; delArmed = false;
+  const now = new Date();
+  const d = m ? clone(m) : {name: '', dose: '', count: 30, pack: 30, mode: 'fix', times: ['08:00'], per: 1, warn: 7, box: 'blister', look: 'own', color: COLORS[state.meds.length % COLORS.length]};
+  $('fT').textContent = m ? 'Bearbeiten' : 'Neues Medikament';
+  $('fName').value = d.name; $('fDose').value = d.dose;
+  $('fCount').value = m ? cur(m, now) : d.count; $('fPack').value = d.pack;
+  document.querySelector('input[name=mode][value=' + d.mode + ']').checked = true; setMode(d.mode);
+  $('fTimes').value = d.times.join(', '); $('fPer').value = d.per; $('fWarn').value = d.warn;
+  document.querySelector('input[name=tone][value=' + (d.two === false ? 'mono' : 'two') + ']').checked = true;
+  document.querySelector('input[name=box][value=' + (d.box === 'dose' ? 'dose' : 'blister') + ']').checked = true;
+  const lv = d.look || 'own'; document.querySelector('input[name=look][value=' + lv + ']').checked = true; setLook(lv);
+  const cr = document.querySelector('input[name=col][value="' + d.color + '"]') || document.querySelector('input[name=col]'); cr.checked = true;
+  $('fDel').hidden = !m; $('fDel').textContent = 'Löschen'; $('fErr').hidden = true;
+  $('dlg').showModal();
+  if (!m) $('fName').focus();
+}
+$('addBtn').addEventListener('click', () => openDlg(null));
+$('fCancel').addEventListener('click', () => $('dlg').close());
+$('fDel').addEventListener('click', () => {
+  if (!editing) return;
+  if (!delArmed) { delArmed = true; $('fDel').textContent = 'Wirklich löschen?'; return; }
+  const id = editing.id, name = editing.name;
+  $('dlg').close();
+  change(name + ' gelöscht', () => { state.meds = state.meds.filter(x => x.id !== id); });
+});
+function err(t) { $('fErr').textContent = t; $('fErr').hidden = false; }
+$('frm').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('fName').value.trim(), dose = $('fDose').value.trim();
+  const count = parseFloat(String($('fCount').value).replace(',', '.'));
+  const pack = parseFloat(String($('fPack').value).replace(',', '.'));
+  const mode = document.querySelector('input[name=mode]:checked').value;
+  const per = parseFloat(String($('fPer').value).replace(',', '.'));
+  const warn = parseInt($('fWarn').value, 10);
+  const color = document.querySelector('input[name=col]:checked').value;
+  const two = document.querySelector('input[name=tone]:checked').value === 'two';
+  const box = document.querySelector('input[name=box]:checked').value;
+  const look = document.querySelector('input[name=look]:checked').value;
+  if (!name) return err('Bitte einen Namen eintragen.');
+  if (!(count >= 0)) return err('Bitte den aktuellen Bestand als Zahl eintragen.');
+  if (!(pack > 0)) return err('Bitte die Packungsgröße eintragen.');
+  let times = [];
+  if (mode === 'fix') {
+    const parts = $('fTimes').value.split(/[,;\s]+/).filter(Boolean);
+    for (const p of parts) {
+      const mm = p.replace('.', ':').match(/^(\d{1,2})(?::(\d{2}))?$/);
+      if (!mm || +mm[1] > 23 || +(mm[2] || 0) > 59) return err('Uhrzeit „' + p + '“ verstehe ich nicht. Beispiel: 07:30');
+      times.push(String(+mm[1]).padStart(2, '0') + ':' + (mm[2] || '00'));
+    }
+    times = [...new Set(times)].sort();
+    if (!times.length) return err('Bitte mindestens eine Uhrzeit eintragen.');
+    if (!(per > 0)) return err('Bitte eintragen, wie viel du pro Einnahme nimmst.');
+  }
+  const data = {name, dose, count: r2(count), pack, mode, times, per: mode === 'fix' ? per : 1, warn: isNaN(warn) ? 7 : warn, color, two, box, look, asOf: Date.now(), full: Math.max(r2(count), pack), sample: false};
+  $('dlg').close();
+  if (editing) { const id = editing.id; change(name + ' gespeichert', () => { Object.assign(state.meds.find(x => x.id === id), data); }); }
+  else change(name + ' hinzugefügt', () => { state.meds.push(Object.assign({id: 'm' + Date.now().toString(36)}, data)); });
+});
+
+// Sicherung
+const bk = $('bk');
+$('bkOpen').addEventListener('click', () => { $('bkT').value = JSON.stringify({v: 1, meds: state.meds}); $('bkE').hidden = true; bk.showModal(); });
+$('bkC').addEventListener('click', () => bk.close());
+$('bkCopy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('bkT').value); toast('Sicherung kopiert', false); }
+  catch (e) { $('bkT').select(); toast('Bitte Text markieren und kopieren', false); }
+});
+$('bkF').addEventListener('submit', e => {
+  e.preventDefault();
+  let d; try { d = JSON.parse($('bkT').value); } catch (x) { d = null; }
+  if (!d || !Array.isArray(d.meds) || d.meds.some(m => typeof m.name !== 'string' || typeof m.count !== 'number')) { $('bkE').textContent = 'Das sieht nicht nach einer Sicherung aus.'; $('bkE').hidden = false; return; }
+  bk.close();
+  change('Sicherung wiederhergestellt', () => { state.meds = d.meds; });
+});
+
+// Hinweise (Benachrichtigung beim Öffnen, höchstens einmal am Tag)
+const hasN = 'Notification' in window && 'serviceWorker' in navigator;
+function ntUi() { const b = $('ntBtn'); if (!hasN || Notification.permission !== 'default') b.hidden = true; }
+$('ntBtn').addEventListener('click', async () => { try { await Notification.requestPermission(); } catch (e) {} ntUi(); notify(true); });
+async function notify(force) {
+  if (!hasN || Notification.permission !== 'granted') return;
+  const now = new Date(), key = now.toDateString();
+  let last = ''; try { last = localStorage.getItem('medi-notified') || ''; } catch (e) {}
+  if (!force && last === key) return;
+  const low = state.meds.map(m => ({m, i: info(m, now)})).filter(r => r.i.level !== 'ok');
+  if (!low.length) return;
+  const body = low.map(r => r.m.name + (r.m.dose ? ' ' + r.m.dose : '') + ': ' + (r.i.level === 'bad' ? 'leer' : 'noch ' + dayTxt(r.i.days))).join(' · ');
+  try { const reg = await navigator.serviceWorker.ready; await reg.showNotification('Medikamente werden knapp', {body, icon: 'icon-192.png', tag: 'medi-low'}); localStorage.setItem('medi-notified', key); } catch (e) {}
+}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+ntUi();
+
+render();
+notify(false);
+if (state.undo && Date.now() - state.undo.at < 90000) toast(state.undo.label, true);
+setInterval(render, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { render(); notify(false); } });
+}
+</script>
+</body>
+</html>
